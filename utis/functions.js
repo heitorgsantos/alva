@@ -121,10 +121,26 @@ const responseClientsOmie = async (page, perPage) => {
   }
 };
 
+const associationCompany = async (deals, baseApi) => {
+  for (let index = 0; index < deals.length; index++) {
+    console.log("INDEX", index);
+    const item = deals[index];
+
+  
+    if (index >= deals.length) {
+      resolve(); // Assuming resolve is defined somewhere in the scope
+    }
+  }
+};
+
 function formataData(data) {
   const splitData = data.split("/");
   const dataFormatada = `${splitData[2]}-${splitData[1]}-${splitData[0]}`;
   return dataFormatada;
 }
 console.log(formataData("12/03/2025"));
-module.exports = { responseProductsOmie, responseClientsOmie };
+module.exports = {
+  responseProductsOmie,
+  responseClientsOmie,
+  associationCompany,
+};
