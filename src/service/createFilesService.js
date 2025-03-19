@@ -6,13 +6,14 @@ const PIPELINE = process.env.PIPELINE;
 const DEALSTAGE = process.env.DEALSTAGE;
 
 const createFilesService = async (data) => {
-  const { topic, event } = data;
+  const { topic, event: {cnpj_cpf, razao_social, codigo_cliente_omie } } = data;
 
-  if (topic === "ClienteFornecedor.Incluido" && event.cnpj_cpf.length === 18) {
+  if (topic === "ClienteFornecedor.Incluido" && cnpj_cpf.length === 18) {
     const propertiesCompany = {
       properties: {
-        cnpj: event.cnpj_cpf,
-        name: event.razao_social,
+        cnpj: cnpj_cpf,
+        name: razao_social,
+        codigo_cliente_omie
       },
     };
     try {
