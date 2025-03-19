@@ -187,8 +187,21 @@ function formataData(data) {
   return dataFormatada;
 }
 console.log(formataData("12/03/2025"));
+
+const findCompany = async (queryCompany) => {
+  const responseFindCompany = await baseHubSpot
+    .post(`crm/v3/objects/company/search`, queryCompany)
+    .then(async (response) => {
+      console.log("Consulta da empresa", response.data);
+      return response.data;
+    })
+    .catch((error) => error.message);
+  return responseFindCompany;
+};
 module.exports = {
   responseProductsOmie,
   responseClientsOmie,
   associationCompany,
+  findCompany,
+  formataData
 };
