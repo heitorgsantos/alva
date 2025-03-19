@@ -3,7 +3,7 @@ const { responseClientsOmie } = require("../../utis/functions");
 
 const integrationClientsService = async () => {
   let next = true;
-  let pageNumber = 192;
+  let pageNumber = 1;
   try {
     while (next) {
       const { pagging, totalPagging, ordersResponse } =

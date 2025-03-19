@@ -1,5 +1,8 @@
 const { baseHubSpot } = require("../../utis/basesApi");
-const { responseClientsOmie } = require("../../utis/functions");
+const {
+  responseClientsOmie,
+  associationCompany,
+} = require("../../utis/functions");
 
 const associationService = async () => {
   const queryDeals = {
@@ -12,54 +15,46 @@ const associationService = async () => {
             propertyName: "controle",
             operator: "NOT_HAS_PROPERTY",
           },
+          {
+            propertyName: "codigo_cliente",
+            operator: "HAS_PROPERTY",
+          },
         ],
       },
     ],
   };
 
-  const {
-    results,
-    paging: {
-      next: { after },
-    },
-  } = await baseApi
+  const { results } = await baseHubSpot
     .post(`crm/v3/objects/deals/search`, queryDeals)
     .then(async (response) => {
       // console.log("Consulta do Negócio", response.data);
       return response.data;
     })
     .catch((error) => error.message);
+  // console.log("Results", results);
 
-  console.log("Results", results);
+  let nextPage;
+  const responseDeals = await associationCompany(results, baseHubSpot);
+  console.log("Depois da Promise", responseDeals);
 
-  //let nextPage;
-  //const responseDeals = await filterDealsWithEmails(results, baseApi);
-  // console.log("Depois da Promise", responseDeals);
-
-  // if (after) nextPage = true;
+  nextPage = true;
   // let newPage = after;
-  // while (nextPage) {
-  //   console.log("Log NewPage", newPage, nextPage);
-  //   nextPage = false;
-  //   await baseApi
-  //     .get(`crm/v3/objects/companies?limit=100&after=${newPage}`)
-  //     .then(async (response) => {
-  //       console.log("Resposta da Próxima Página", response.data);
-  //       const {
-  //         results,
-  //         paging: {
-  //           next: { after },
-  //         },
-  //       } = response.data;
-  //       if (after) nextPage = true;
-  //       newPage = after;
-  //       console.log("Log NewPage", newPage, nextPage);
+  while (nextPage) {
+    nextPage = false;
+    await baseHubSpot
+      .post(`crm/v3/objects/deals/search`, queryDeals)
+      .then(async (response) => {
+        // console.log("Resposta da Próxima Página", response.data);
+        const { results } = response.data;
+        if (results.length > 0) nextPage = true;
 
-  //       await filterDealsWithEmails(results, baseApi);
-  //       return response.data;
-  //     })
-  //     .catch((error) => error.message);
-  // }
+        console.log("Log NewPage", nextPage);
+
+        await associationCompany(results, baseHubSpot);
+        return response.data;
+      })
+      .catch((error) => error.message);
+  }
   return "Correção de E-mails finalizada!";
 };
 

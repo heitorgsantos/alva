@@ -90,11 +90,11 @@ const responseClientsOmie = async (page, perPage) => {
               codigo_pedido,
               data_previsao,
             },
-            infoCadastro: { faturado },
+            infoCadastro: { faturado, dFat, cancelado },
             frete: { valor_frete },
             total_pedido: { valor_mercadorias, valor_total_pedido },
           } = pedido;
-          if (faturado === "S") {
+          if (faturado === "S" && cancelado === "N") {
             const dealsProperties = {
               properties: {
                 pipeline: PIPELINE,
@@ -108,6 +108,7 @@ const responseClientsOmie = async (page, perPage) => {
                 valor_mercadorias,
                 valor_total_pedido,
                 amount: valor_total_pedido,
+                closedate: formataData(dFat),
               },
             };
             return dealsProperties;
@@ -121,12 +122,59 @@ const responseClientsOmie = async (page, perPage) => {
   }
 };
 
-const associationCompany = async (deals, baseApi) => {
+const associationCompany = async (deals) => {
   for (let index = 0; index < deals.length; index++) {
     console.log("INDEX", index);
     const item = deals[index];
 
-  
+    console.log("aqui", item.properties.hs_object_id);
+    const dealId = item.properties.hs_object_id;
+
+    const queryCompany = {
+      properties: ["hs_object_id", "codigo_cliente_omie"],
+      limit: 100,
+      filterGroups: [
+        {
+          filters: [
+            {
+              propertyName: "codigo_cliente_omie",
+              value: item.properties.codigo_cliente,
+              operator: "EQ",
+            },
+          ],
+        },
+      ],
+    };
+
+    const { results } = await baseHubSpot
+      .post(`crm/v3/objects/company/search`, queryCompany)
+      .then(async (response) => {
+        console.log("Consulta do Negócio", response.data);
+        return response.data;
+      })
+      .catch((error) => error.message);
+
+    if (results.length > 0) {
+      console.log("Consulta do Negócio", results[0]);
+
+      const idCompany = results[0].id;
+      console.log("ID da empresa", idCompany);
+
+      await baseHubSpot.put(
+        `crm/v4/objects/companies/${idCompany}/associations/default/deals/${dealId}`
+      );
+      await baseHubSpot.patch(
+        `crm/v3/objects/deals/${item.properties.hs_object_id}`,
+        { properties: { controle: true } }
+      );
+    } else {
+      console.log("Não tem id do cliente");
+      await baseHubSpot.patch(
+        `crm/v3/objects/deals/${item.properties.hs_object_id}`,
+        { properties: { controle: false } }
+      );
+    }
+
     if (index >= deals.length) {
       resolve(); // Assuming resolve is defined somewhere in the scope
     }
