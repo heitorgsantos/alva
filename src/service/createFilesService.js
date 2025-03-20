@@ -27,7 +27,6 @@ const createFilesService = async (data) => {
     }
   } else if (topic === "VendaProduto.Faturada") {
     const {
-      topic,
       event: { dataFaturado, idCliente, idPedido, valorPedido },
     } = data;
 
