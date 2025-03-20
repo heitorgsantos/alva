@@ -29,7 +29,7 @@ const createFilesService = async (data) => {
     const {
       event: { dataFaturado, idCliente, idPedido, valorPedido },
     } = data;
-
+    console.log("Venda faturada")
     try {
       const responseCompany = await findCompany(queryCompany(idCliente));
 
