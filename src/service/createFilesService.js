@@ -10,6 +10,7 @@ const createFilesService = async (data) => {
     topic,
     event: { cnpj_cpf, razao_social, codigo_cliente_omie },
   } = data;
+  console.log(topic)
 
   if (topic === "ClienteFornecedor.Incluido" && cnpj_cpf.length === 18) {
     const propertiesCompany = {
