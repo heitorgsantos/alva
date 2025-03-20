@@ -6,14 +6,17 @@ const PIPELINE = process.env.PIPELINE;
 const DEALSTAGE = process.env.DEALSTAGE;
 
 const createFilesService = async (data) => {
-  const { topic, event: {cnpj_cpf, razao_social, codigo_cliente_omie } } = data;
+  const {
+    topic,
+    event: { cnpj_cpf, razao_social, codigo_cliente_omie },
+  } = data;
 
   if (topic === "ClienteFornecedor.Incluido" && cnpj_cpf.length === 18) {
     const propertiesCompany = {
       properties: {
         cnpj: cnpj_cpf,
         name: razao_social,
-        codigo_cliente_omie
+        codigo_cliente_omie,
       },
     };
     try {
@@ -25,11 +28,12 @@ const createFilesService = async (data) => {
     } catch (error) {
       return error;
     }
-  } else if (topic === "VendaProduto.Faturada") {
+  }
+  if (topic === "VendaProduto.Faturada") {
     const {
       event: { dataFaturado, idCliente, idPedido, valorPedido },
     } = data;
-    console.log("Venda faturada")
+    console.log("Venda faturada");
     try {
       const responseCompany = await findCompany(queryCompany(idCliente));
 
