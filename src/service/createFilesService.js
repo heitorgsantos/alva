@@ -34,7 +34,7 @@ const createFilesService = async (data) => {
     try {
       const responseCompany = await findCompany(queryCompany(idCliente));
 
-      if (responseCompany?.results) {
+      if (responseCompany?.results.length > 0) {
         const companyId = responseCompany.results[0].id;
         console.log("Resposta empresa", companyId);
         const propertiesDeals = {
