@@ -65,6 +65,7 @@ const responseClientsOmie = async (page, perPage) => {
         pagina: page,
         registros_por_pagina: perPage,
         apenas_importado_api: "N",
+        etapa: "60",
       },
     ],
     app_key: APP_KEY,
@@ -89,12 +90,13 @@ const responseClientsOmie = async (page, perPage) => {
               codigo_empresa,
               codigo_pedido,
               data_previsao,
+              etapa
             },
             infoCadastro: { faturado, dFat, cancelado },
             frete: { valor_frete },
             total_pedido: { valor_mercadorias, valor_total_pedido },
           } = pedido;
-          if (faturado === "S" && cancelado === "N") {
+          if (faturado === "S") {
             const dealsProperties = {
               properties: {
                 pipeline: PIPELINE,
@@ -109,6 +111,8 @@ const responseClientsOmie = async (page, perPage) => {
                 valor_total_pedido,
                 amount: valor_total_pedido,
                 closedate: formataData(dFat),
+                etapa,
+                cancelado
               },
             };
             return dealsProperties;
@@ -203,5 +207,5 @@ module.exports = {
   responseClientsOmie,
   associationCompany,
   findCompany,
-  formataData
+  formataData,
 };
