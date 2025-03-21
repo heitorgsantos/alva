@@ -82,7 +82,7 @@ const responseClientsOmie = async (page, perPage) => {
       .then(async (response) => {
         pagging = response.data.pagina;
         totalPagging = response.data.total_de_paginas;
-        // console.log(response.data);
+        console.log(response.data.pedido_venda_produto.length);
         return response.data.pedido_venda_produto.map((pedido) => {
           const {
             cabecalho: {
@@ -90,13 +90,27 @@ const responseClientsOmie = async (page, perPage) => {
               codigo_empresa,
               codigo_pedido,
               data_previsao,
-              etapa
+              etapa,
             },
             infoCadastro: { faturado, dFat, cancelado },
             frete: { valor_frete },
             total_pedido: { valor_mercadorias, valor_total_pedido },
           } = pedido;
-          if (faturado === "S") {
+          if (faturado === "S" ) {
+            console.log(
+              faturado,
+              codigo_cliente,
+              codigo_empresa,
+              codigo_pedido,
+              data_previsao,
+              etapa,
+              faturado,
+              dFat,
+              cancelado,
+              valor_frete,
+              valor_mercadorias,
+              valor_total_pedido
+            );
             const dealsProperties = {
               properties: {
                 pipeline: PIPELINE,
@@ -105,14 +119,14 @@ const responseClientsOmie = async (page, perPage) => {
                 codigo_cliente,
                 codigo_empresa,
                 codigo_pedido,
-                data_previsao: formataData(data_previsao),
+                data_previsao: data_previsao !== undefined ? formataData(data_previsao) : "" ,
                 valor_frete,
                 valor_mercadorias,
                 valor_total_pedido,
                 amount: valor_total_pedido,
-                closedate: formataData(dFat),
-                etapa,
-                cancelado
+                closedate: dFat !== undefined ? formataData(dFat) : "",
+                etapa: etapa,
+                cancelado: cancelado
               },
             };
             return dealsProperties;
@@ -190,6 +204,7 @@ function formataData(data) {
   const dataFormatada = `${splitData[2]}-${splitData[1]}-${splitData[0]}`;
   return dataFormatada;
 }
+
 console.log(formataData("12/03/2025"));
 
 const findCompany = async (queryCompany) => {
