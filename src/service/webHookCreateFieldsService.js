@@ -5,7 +5,7 @@ require("dotenv").config();
 const PIPELINE = process.env.PIPELINE;
 const DEALSTAGE = process.env.DEALSTAGE;
 
-const createFilesService = async (data) => {
+const webHookCreateFieldsService = async (data) => {
   const {
     topic,
     event: { cnpj_cpf, razao_social, codigo_cliente_omie },
@@ -30,6 +30,7 @@ const createFilesService = async (data) => {
       return error;
     }
   }
+  
   if (topic === "VendaProduto.Faturada") {
     const {
       event: { dataFaturado, idCliente, idPedido, valorPedido },
@@ -79,7 +80,11 @@ const createFilesService = async (data) => {
     }
   }
 
+  if(topic === "Produto.Incluido") {
+    console.log(data)
+  }
+
   return { status: 200, message: data };
 };
 
-module.exports = { createFilesService };
+module.exports = { webHookCreateFieldsService };
