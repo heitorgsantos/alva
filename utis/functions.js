@@ -1,3 +1,4 @@
+const { returnId } = require("../produtos");
 const { baseOmie, baseHubSpot } = require("./basesApi");
 require("dotenv").config();
 const APP_KEY = process.env.APP_KEY;
@@ -58,7 +59,7 @@ const responseProductsOmie = async (page, perPage) => {
   }
 };
 
-const responseClientsOmie = async (page, perPage) => {
+const returnDealProperties = async (page, perPage) => {
   const params = {
     param: [
       {
@@ -94,9 +95,15 @@ const responseClientsOmie = async (page, perPage) => {
             },
             infoCadastro: { faturado, dFat, cancelado },
             frete: { valor_frete },
+            det: {
+              produto: codigo_produto,
+              descricao,
+              valor_desconto,
+              valor_total,
+            },
             total_pedido: { valor_mercadorias, valor_total_pedido },
           } = pedido;
-          if (faturado === "S" ) {
+          if (faturado === "S") {
             console.log(
               faturado,
               codigo_cliente,
@@ -119,14 +126,15 @@ const responseClientsOmie = async (page, perPage) => {
                 codigo_cliente,
                 codigo_empresa,
                 codigo_pedido,
-                data_previsao: data_previsao !== undefined ? formataData(data_previsao) : "" ,
+                data_previsao:
+                  data_previsao !== undefined ? formataData(data_previsao) : "",
                 valor_frete,
                 valor_mercadorias,
                 valor_total_pedido,
                 amount: valor_total_pedido,
                 closedate: dFat !== undefined ? formataData(dFat) : "",
                 etapa: etapa,
-                cancelado: cancelado
+                cancelado: cancelado,
               },
             };
             return dealsProperties;
@@ -217,10 +225,78 @@ const findCompany = async (queryCompany) => {
     .catch((error) => error.message);
   return responseFindCompany;
 };
+
+const returnProductsAssociatedsDeals = async (page, perPage) => {
+  const params = {
+    param: [
+      {
+        pagina: page,
+        registros_por_pagina: perPage,
+        apenas_importado_api: "N",
+        etapa: "60",
+      },
+    ],
+    app_key: APP_KEY,
+    app_secret: APP_SECRET,
+    call: "ListarPedidos",
+  };
+  try {
+    let pagging;
+    let totalPagging;
+    let arrayDealProperties = [];
+    let responseOmie = await baseOmie
+      .post("api/v1/produtos/pedido/", params)
+      .then(async (response) => {
+        pagging = response.data.pagina;
+        totalPagging = response.data.total_de_paginas;
+        console.log(response.data.pedido_venda_produto.length);
+
+        // return response.data.pedido_venda_produto.map((pedido) => {
+        //   const {
+        //     cabecalho: { codigo_pedido },
+        //     infoCadastro: { faturado },
+        //     det: {
+        //       produto: codigo_produto,
+        //       descricao,
+        //       valor_desconto,
+        //       valor_total,
+        //     },
+        //   } = pedido;
+        //   if (faturado === "S") {
+
+        //   }
+        // });
+      });
+    const ordersResponse = responseOmie.filter((item) => item !== undefined);
+    return { pagging, totalPagging, ordersResponse };
+  } catch (error) {
+    return error;
+  }
+};
+
+const formatEvent = (event) => {
+  delete event.recomendacoes_fiscais;
+  delete event.imagens;
+  delete event.info;
+  event.tipoitem = event.tipoItem;
+  delete event.tipoItem;
+  event.codint_familia = event.codInt_familia;
+  delete event.codInt_familia;
+  delete event.combustivel
+  event.hs_sku = event.codigo_produto;
+  event.name = event.descricao;
+  const propertiesProcutcs = {
+    properties: event
+  };
+
+  return propertiesProcutcs;
+};
+
 module.exports = {
   responseProductsOmie,
-  responseClientsOmie,
+  returnDealProperties,
   associationCompany,
   findCompany,
   formataData,
+  formatEvent,
 };

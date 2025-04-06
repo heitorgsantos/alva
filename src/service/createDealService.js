@@ -1,13 +1,13 @@
 const { baseHubSpot } = require("../../utis/basesApi");
-const { responseClientsOmie } = require("../../utis/functions");
+const { returnDealProperties } = require("../../utis/functions");
 
-const integrationClientsService = async () => {
+const createDealService = async () => {
   let next = true;
   let pageNumber = 1;
   try {
     while (next) {
       const { pagging, totalPagging, ordersResponse } =
-        await responseClientsOmie(pageNumber, 100);
+        await returnDealProperties(pageNumber, 100);
       let fieldsToCreate = [];
       pageNumber++;
 
@@ -40,4 +40,4 @@ const integrationClientsService = async () => {
   }
 };
 
-module.exports = { integrationClientsService };
+module.exports = { createDealService };

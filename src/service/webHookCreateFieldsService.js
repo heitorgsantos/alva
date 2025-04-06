@@ -1,18 +1,20 @@
 const { baseHubSpot } = require("../../utis/basesApi");
-const { findCompany, formataData } = require("../../utis/functions");
+const {
+  findCompany,
+  formataData,
+  formatEvent,
+} = require("../../utis/functions");
 const { queryCompany } = require("../../utis/querys");
 require("dotenv").config();
 const PIPELINE = process.env.PIPELINE;
 const DEALSTAGE = process.env.DEALSTAGE;
 
 const webHookCreateFieldsService = async (data) => {
-  const {
-    topic,
-    event: { cnpj_cpf, razao_social, codigo_cliente_omie },
-  } = data;
-  console.log(topic)
-
+  const { topic } = data;
   if (topic === "ClienteFornecedor.Incluido" && cnpj_cpf.length === 18) {
+    const {
+      event: { cnpj_cpf, razao_social, codigo_cliente_omie },
+    } = data;
     const propertiesCompany = {
       properties: {
         cnpj: cnpj_cpf,
@@ -30,7 +32,7 @@ const webHookCreateFieldsService = async (data) => {
       return error;
     }
   }
-  
+
   if (topic === "VendaProduto.Faturada") {
     const {
       event: { dataFaturado, idCliente, idPedido, valorPedido },
@@ -80,8 +82,17 @@ const webHookCreateFieldsService = async (data) => {
     }
   }
 
-  if(topic === "Produto.Incluido") {
-    console.log(data)
+  if (topic === "Produto.Incluido") {
+    const { event } = data;
+    const properties = formatEvent(event);
+    const responseCreateProduct = await baseHubSpot
+    .post(`crm/v3/objects/products`, properties)
+    .then((response) => response);
+    console.log(responseCreateProduct.status)
+    if (responseCreateProduct.status === 201) {
+      return { status: 201, message: responseCreateProduct.data };
+    }
+    return { status: 400, message:  responseCreateProduct.data};
   }
 
   return { status: 200, message: data };

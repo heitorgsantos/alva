@@ -6,7 +6,7 @@ const integrationProductsService = async (data) => {
   //   .post(`crm/v3/objects/products/batch/create`, { properties: responseOmie })
   //   .then((response) => response.data);
   let next = true;
-  let pageNumber = 31;
+  let pageNumber = 33;
   // const { pagging, totalPagging, responseOmie } = await responseProductsOmie(
   //   1,
   //   1530
@@ -22,7 +22,7 @@ const integrationProductsService = async (data) => {
     for (let i = 0; i <= responseOmie.length; i++) {
       
       fieldsToCreate.push(responseOmie[i]);
-      if (fieldsToCreate.length === 30) {
+      if (fieldsToCreate.length === 16) {
         const responseCreateProduct = await baseHubSpot
         .post(`crm/v3/objects/products/batch/create`, {
           inputs: fieldsToCreate,
@@ -41,7 +41,7 @@ const integrationProductsService = async (data) => {
     if (pageNumber > totalPagging) next = false;
     
   }
-  return "BÂO";
+  return "Produtos cadastrados com sucesso!";
 };
 
 module.exports = { integrationProductsService };

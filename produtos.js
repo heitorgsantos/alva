@@ -1,4 +1,4 @@
-const produtos = [
+const produtosOmie = [
   {
     combustivel: {},
     ide: {
@@ -3191,3 +3191,9 @@ const produtos = [
     tributavel: {},
   },
 ];
+
+const returnId = produtosOmie.map(({ produto }) => ({
+  id: produto.codigo_produto,
+}));
+
+module.exports = { returnId };
