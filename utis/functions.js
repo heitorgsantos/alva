@@ -251,24 +251,74 @@ const returnProductsAssociatedsDeals = async (page, perPage) => {
         totalPagging = response.data.total_de_paginas;
         console.log(response.data.pedido_venda_produto.length);
 
-        // return response.data.pedido_venda_produto.map((pedido) => {
-        //   const {
-        //     cabecalho: { codigo_pedido },
-        //     infoCadastro: { faturado },
-        //     det: {
-        //       produto: codigo_produto,
-        //       descricao,
-        //       valor_desconto,
-        //       valor_total,
-        //     },
-        //   } = pedido;
-        //   if (faturado === "S") {
+        let count = 1;
+        for (const item of response.data.pedido_venda_produto) {
+          count++;
+          const {
+            cabecalho: { codigo_pedido },
+            det,
+          } = item;
 
-        //   }
-        // });
+          let amount = 0;
+          // console.log(codigo_pedido, det)
+
+          const propertiesLineItems = det.map(({ produto }) => {
+            amount += Number(produto.valor_total);
+            return formatEvent(produto);
+          });
+          const propertiesFetchDeal = {
+            properties: ["hs_object_id"],
+            filterGroups: [
+              {
+                filters: [
+                  {
+                    propertyName: "codigo_pedido",
+                    value: codigo_pedido,
+                    operator: "EQ",
+                  },
+                ],
+              },
+            ],
+          };
+
+          const responseDealID = await baseHubSpot
+            .post("/crm/v3/objects/deals/search", propertiesFetchDeal)
+            .then((response) => {
+              if (response.data.results.length > 0) {
+                return response.data.results[0].id;
+              }
+              return "Not Found";
+            });
+          console.log("Deal ID", responseDealID);
+          const inputs = propertiesLineItems.map(({ properties }) => ({
+            associations: [
+              {
+                types: [
+                  {
+                    associationCategory: "HUBSPOT_DEFINED",
+                    associationTypeId: 20,
+                  },
+                ],
+                to: {
+                  id: responseDealID,
+                },
+              },
+            ],
+            properties,
+          }));
+
+          if (responseDealID !== "Not Found") {
+            console.log("response id", { inputs });
+            await baseHubSpot.post("/crm/v3/objects/line_items/batch/create", {
+              inputs,
+            });
+          }
+
+          if (count === 100) {
+            resolve();
+          }
+        }
       });
-    const ordersResponse = responseOmie.filter((item) => item !== undefined);
-    return { pagging, totalPagging, ordersResponse };
   } catch (error) {
     return error;
   }
@@ -282,11 +332,11 @@ const formatEvent = (event) => {
   delete event.tipoItem;
   event.codint_familia = event.codInt_familia;
   delete event.codInt_familia;
-  delete event.combustivel
+  delete event.combustivel;
   event.hs_sku = event.codigo_produto;
   event.name = event.descricao;
   const propertiesProcutcs = {
-    properties: event
+    properties: event,
   };
 
   return propertiesProcutcs;
@@ -299,4 +349,5 @@ module.exports = {
   findCompany,
   formataData,
   formatEvent,
+  returnProductsAssociatedsDeals,
 };

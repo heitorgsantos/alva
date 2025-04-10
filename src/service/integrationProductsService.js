@@ -6,7 +6,7 @@ const integrationProductsService = async (data) => {
   //   .post(`crm/v3/objects/products/batch/create`, { properties: responseOmie })
   //   .then((response) => response.data);
   let next = true;
-  let pageNumber = 33;
+  let pageNumber = 1;
   // const { pagging, totalPagging, responseOmie } = await responseProductsOmie(
   //   1,
   //   1530
@@ -16,18 +16,18 @@ const integrationProductsService = async (data) => {
       pageNumber,
       50
     );
+    console.log("Página do Produto", pagging);
     let fieldsToCreate = [];
     pageNumber++;
 
     for (let i = 0; i <= responseOmie.length; i++) {
-      
       fieldsToCreate.push(responseOmie[i]);
-      if (fieldsToCreate.length === 16) {
+      if (fieldsToCreate.length === 50) {
         const responseCreateProduct = await baseHubSpot
-        .post(`crm/v3/objects/products/batch/create`, {
-          inputs: fieldsToCreate,
-        })
-        .then((response) => response.data);
+          .post(`crm/v3/objects/products/batch/create`, {
+            inputs: fieldsToCreate,
+          })
+          .then((response) => response.data);
         console.log("Resposta da criação", responseCreateProduct);
         fieldsToCreate = [];
       }
@@ -39,7 +39,6 @@ const integrationProductsService = async (data) => {
     next = true;
 
     if (pageNumber > totalPagging) next = false;
-    
   }
   return "Produtos cadastrados com sucesso!";
 };
