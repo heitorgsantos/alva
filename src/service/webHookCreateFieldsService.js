@@ -11,6 +11,8 @@ const DEALSTAGE = process.env.DEALSTAGE;
 
 const webHookCreateFieldsService = async (data) => {
   const { topic } = data;
+
+  console.log("TOPIC", topic)
   if (topic === "ClienteFornecedor.Incluido" && cnpj_cpf.length === 18) {
     const {
       event: { cnpj_cpf, razao_social, codigo_cliente_omie },
