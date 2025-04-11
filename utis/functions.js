@@ -67,6 +67,7 @@ const returnDealProperties = async (page, perPage) => {
         registros_por_pagina: perPage,
         apenas_importado_api: "N",
         etapa: "60",
+        data_faturamento_de: "03/04/2025",
       },
     ],
     app_key: APP_KEY,
@@ -261,7 +262,8 @@ const returnProductsAssociatedsDeals = async (page, perPage) => {
 
           let amount = 0;
           // console.log(codigo_pedido, det)
-
+          // 34906597240
+          // 34906597231
           const propertiesLineItems = det.map(({ produto }) => {
             amount += Number(produto.valor_total);
             return formatEvent(produto);
