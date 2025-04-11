@@ -14,6 +14,7 @@ const webHookCreateFieldsService = async (data) => {
 
   console.log("Dados Recebidos", data)
   if (topic === "ClienteFornecedor.Incluido" && data.event.cnpj_cpf.length === 18) {
+    console.log("Empresa Incluida")
     const {
       event: { cnpj_cpf, razao_social, codigo_cliente_omie },
     } = data;
