@@ -208,17 +208,31 @@ const associationCompany = async (deals) => {
   }
 };
 
+const queryCompanyCnpj = (cnpj_cpf) => ({
+  properties: ["hs_object_id", "codigo_cliente_omie", "cnpj", "cpf"],
+  limit: 100,
+  filterGroups: [
+    {
+      filters: [
+        {
+          propertyName: cnpj_cpf.length === 18 ? "cnpj" : "cpf",
+          value: cnpj_cpf,
+          operator: "EQ",
+        },
+      ],
+    },
+  ],
+});
+
 function formataData(data) {
   const splitData = data.split("/");
   const dataFormatada = `${splitData[2]}-${splitData[1]}-${splitData[0]}`;
   return dataFormatada;
 }
 
-console.log(formataData("12/03/2025"));
-
 const findCompany = async (queryCompany) => {
   const responseFindCompany = await baseHubSpot
-    .post(`crm/v3/objects/company/search`, queryCompany)
+    .post(`crm/v3/objects/companies/search`, queryCompany)
     .then(async (response) => {
       console.log("Consulta da empresa", response.data);
       return response.data;
@@ -352,4 +366,5 @@ module.exports = {
   formataData,
   formatEvent,
   returnProductsAssociatedsDeals,
+  queryCompanyCnpj,
 };

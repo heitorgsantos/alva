@@ -3,6 +3,7 @@ const {
   findCompany,
   formataData,
   formatEvent,
+  queryCompanyCnpj,
 } = require("../../utis/functions");
 const { queryCompany } = require("../../utis/querys");
 require("dotenv").config();
@@ -12,11 +13,15 @@ const DEALSTAGE = process.env.DEALSTAGE;
 const webHookCreateFieldsService = async (data) => {
   const { topic } = data;
 
-  console.log("Dados Recebidos", data)
-  if (topic === "ClienteFornecedor.Incluido" && data.event.cnpj_cpf.length === 18) {
-    console.log("Empresa Incluida")
+  console.log("Dados Recebidos", data);
+  if (
+    (topic === "ClienteFornecedor.Incluido" &&
+      data.event.cnpj_cpf.length === 18) ||
+    data.event.cnpj_cpf.length === 14
+  ) {
+    console.log("Empresa Incluida");
     const {
-      event: { cnpj_cpf, razao_social, codigo_cliente_omie },
+      event: { cnpj_cpf, razao_social, codigo_cliente_omie, inativo },
     } = data;
     const propertiesCompany = {
       properties: {
@@ -25,7 +30,26 @@ const webHookCreateFieldsService = async (data) => {
         codigo_cliente_omie,
       },
     };
+
     try {
+      const consultaCnpjHs = await findCompany(queryCompanyCnpj(cnpj_cpf));
+
+      if (consultaCnpjHs.results.length > 0 && inativo === "N") {
+        const {
+          properties: { cnpj, cpf, hs_object_id },
+        } = consultaCnpjHs.results[0];
+
+        const responseUpdateCompany = await baseHubSpot.patch(
+          `crm/v3/objects/companies/${hs_object_id}`,
+          { properties: { codigo_cliente_omie } }
+        );
+        console.log("Atualização de empresas");
+        return {
+          status: responseUpdateCompany.status,
+          message: responseUpdateCompany.data,
+        };
+      }
+
       const responseCreateClient = await baseHubSpot
         .post("crm/v3/objects/companies", propertiesCompany)
         .then((response) => response);
@@ -89,13 +113,13 @@ const webHookCreateFieldsService = async (data) => {
     const { event } = data;
     const properties = formatEvent(event);
     const responseCreateProduct = await baseHubSpot
-    .post(`crm/v3/objects/products`, properties)
-    .then((response) => response);
-    console.log(responseCreateProduct.status)
+      .post(`crm/v3/objects/products`, properties)
+      .then((response) => response);
+    console.log(responseCreateProduct.status);
     if (responseCreateProduct.status === 201) {
       return { status: 201, message: responseCreateProduct.data };
     }
-    return { status: 400, message:  responseCreateProduct.data};
+    return { status: 400, message: responseCreateProduct.data };
   }
 
   return { status: 200, message: data };
