@@ -1,16 +1,18 @@
 const { Worker } = require("bullmq");
-const { connection } = require("../queues/webhookQueue");
+// const { webHookCreateFieldsService } = require("../services/webHookCreateFieldsService"); // Adjust path if needed
+const { connection } = require("../queues/webhookQueue"); // Reuse connection options
 const {
   webHookCreateFieldsService,
 } = require("../service/webHookCreateFieldsService");
 require("dotenv").config();
 
 const worker = new Worker(
-  "webhook-processing",
+  "webhook-processing", // Must match the queue name
   async (job) => {
     console.log(`Processing job ${job.id} for topic: ${job.data.topic}`);
     try {
       const result = await webHookCreateFieldsService(job.data);
+
       if (result.status >= 200 && result.status < 300) {
         console.log(`Job ${job.id} completed successfully: `, result.message);
         return result; // Job successful
@@ -19,6 +21,7 @@ const worker = new Worker(
           `Job ${job.id} processed with non-success status ${result.status}: `,
           result.message
         );
+
         const error = new Error(
           typeof result.message === "string"
             ? result.message
@@ -33,6 +36,7 @@ const worker = new Worker(
         error.message,
         error.status ? `Status: ${error.status}` : ""
       );
+
       if (error.response && error.response.data) {
         throw new Error(JSON.stringify(error.response.data));
       }

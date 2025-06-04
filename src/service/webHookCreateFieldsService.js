@@ -62,8 +62,8 @@ const handleClientSupplierIncluded = async ({
       error.message,
       error.status ? `Status: ${error.status}` : ""
     );
-    // Re-throw the original error or a new one for the worker to catch
-    throw error; // This ensures BullMQ's retry logic is triggered
+    
+    throw error;
   }
 };
 
