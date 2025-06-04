@@ -1,22 +1,25 @@
+// src/queues/webhookQueue.js
 const { Queue } = require("bullmq");
 require("dotenv").config();
 
+// Função para obter a configuração de conexão do Redis
 const getRedisConnectionConfig = () => {
   if (process.env.REDIS_URL) {
+    console.log("Using REDIS_URL for connection:", process.env.REDIS_URL); // Log para debug
     return process.env.REDIS_URL;
   }
-
+  console.log("Using REDIS_HOST/PORT for connection."); // Log para debug
   return {
     host: process.env.REDIS_HOST || "127.0.0.1",
     port: parseInt(process.env.REDIS_PORT || "6379", 10),
+    password: process.env.REDIS_PASSWORD, // Importante adicionar, será undefined se não houver
   };
 };
 
 const redisConnectionConfig = getRedisConnectionConfig();
-const connection = redisConnectionConfig
 
 const webhookProcessingQueue = new Queue("webhook-processing", {
-  connection,
+  connection: redisConnectionConfig,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -35,4 +38,4 @@ const webhookProcessingQueue = new Queue("webhook-processing", {
 });
 
 // Exporta a fila e a configuração de conexão para ser usada pelo worker
-module.exports = { webhookProcessingQueue, connection };
+module.exports = { webhookProcessingQueue, redisConnectionConfig };
