@@ -57,10 +57,13 @@ const handleClientSupplierIncluded = async ({
       };
     }
   } catch (error) {
-    throw {
-      status: error.response?.status || 500,
-      message: error.response?.data || error.message,
-    };
+    console.error(
+      `Error in webHookCreateFieldsService for topic ${data.topic}:`,
+      error.message,
+      error.status ? `Status: ${error.status}` : ""
+    );
+    // Re-throw the original error or a new one for the worker to catch
+    throw error; // This ensures BullMQ's retry logic is triggered
   }
 };
 
