@@ -13,9 +13,10 @@ const getRedisConnectionConfig = () => {
 };
 
 const redisConnectionConfig = getRedisConnectionConfig();
+const connection = redisConnectionConfig
 
 const webhookProcessingQueue = new Queue("webhook-processing", {
-  connection: redisConnectionConfig,
+  connection,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -34,4 +35,4 @@ const webhookProcessingQueue = new Queue("webhook-processing", {
 });
 
 // Exporta a fila e a configuração de conexão para ser usada pelo worker
-module.exports = { webhookProcessingQueue, redisConnectionConfig };
+module.exports = { webhookProcessingQueue, connection };
