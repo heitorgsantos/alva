@@ -1,10 +1,14 @@
 // src/workers/webhookWorker.js
 const { Worker } = require("bullmq");
-const { redisConnectionConfig } = require("../queues/webhookQueue"); // Importa a config correta
-const { webHookCreateFieldsService } = require("../service/webHookCreateFieldsService"); // Verifique o caminho
+// Não importa mais redisConnectionConfig aqui por enquanto, mas mantenha para ver se ajuda
+// const { redisConnectionConfig } = require("../queues/webhookQueue");
+const { webHookCreateFieldsService } = require("../service/webHookCreateFieldsService");
 require("dotenv").config();
 
-console.log(redisConnectionConfig)
+// Re-leia a variável de ambiente diretamente aqui para garantir
+const directRedisUrl = process.env.REDIS_URL;
+console.log("DEBUG Worker: Redis URL being used directly:", directRedisUrl); // Novo log de debug
+
 const worker = new Worker(
   "webhook-processing",
   async (job) => {
@@ -30,7 +34,8 @@ const worker = new Worker(
     }
   },
   {
-    connection: redisConnectionConfig, // Usa a config importada
+    // *** MUDE ISTO: Use directRedisUrl aqui ***
+    connection: directRedisUrl, // Use a URL diretamente
     concurrency: parseInt(process.env.WORKER_CONCURRENCY || "5", 10),
     limiter: {
       max: 10,
