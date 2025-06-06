@@ -1,13 +1,27 @@
-const {
-  webHookCreateFieldsService,
-} = require("../service/webHookCreateFieldsService");
+// src/controllers/webHookCreateFieldsController.js
+const { webhookProcessingQueue } = require("../queues/webhookQueue"); // Ajuste o caminho se necessário
 
 const webHookCreateFieldsController = async (req, res) => {
   try {
-    const response = await webHookCreateFieldsService(req.body);
-    return res.status(response.status).json(response.message);
+    const jobData = req.body;
+
+    if (!jobData || !jobData.topic || !jobData.event) {
+      return res.status(400).json({
+        message: "Invalid webhook data: topic and event are required.",
+      });
+    }
+
+    await webhookProcessingQueue.add(`webhook-${jobData.topic}`, jobData);
+
+    console.log(
+      `Webhook event for topic "${jobData.topic}" queued for processing.`
+    );
+    return res
+      .status(202)
+      .json({ message: "Webhook received and queued for processing." });
   } catch (error) {
-    return res.status(400).json(error.message);
+    console.error("Error adding webhook event to queue:", error);
+    return res.status(500).json({ message: "Failed to queue webhook event." });
   }
 };
 
