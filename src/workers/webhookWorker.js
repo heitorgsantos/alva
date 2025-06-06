@@ -4,6 +4,7 @@ const { redisConnectionConfig } = require("../queues/webhookQueue"); // Importa 
 const { webHookCreateFieldsService } = require("../service/webHookCreateFieldsService"); // Verifique o caminho
 require("dotenv").config();
 
+console.log(redisConnectionConfig)
 const worker = new Worker(
   "webhook-processing",
   async (job) => {
