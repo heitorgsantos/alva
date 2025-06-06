@@ -4,6 +4,7 @@ require("dotenv").config();
 
 // Função para obter a configuração de conexão do Redis
 const getRedisConnectionConfig = () => {
+  console.log("process.env.REDIS_URL", process.env.REDIS_URL)
   if (process.env.REDIS_URL) {
     console.log("Using REDIS_URL for connection:", process.env.REDIS_URL); // Log para debug
     return process.env.REDIS_URL;
