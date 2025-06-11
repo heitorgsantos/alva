@@ -6,6 +6,9 @@ const webHookCreateFieldsController = async (req, res) => {
     const jobData = req.body;
 
     console.log(jobData)
+    return res
+      .status(200)
+      .json({ message: "Webhook received and queued for processing." });
 
     if (!jobData || !jobData.topic || !jobData.event) {
       return res.status(400).json({
