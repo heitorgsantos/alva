@@ -1,25 +1,27 @@
 // src/queues/webhookQueue.js
 const { Queue } = require("bullmq");
+const Redis = require("ioredis"); // Import the ioredis library
 require("dotenv").config();
 
-// Função para obter a configuração de conexão do Redis
-const getRedisConnectionConfig = () => {
-  console.log("process.env.REDIS_URL", process.env.REDIS_URL)
-  if (process.env.REDIS_URL) {
-    console.log("Using REDIS_URL for connection:", process.env.REDIS_URL); // Log para debug
-    return process.env.REDIS_URL;
-  }
-  console.log("Using REDIS_HOST/PORT for connection."); // Log para debug
-  return {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: parseInt(process.env.REDIS_PORT || "6379", 10),
-  };
-};
+// Determine the Redis connection options
+const connectionOptions = process.env.REDIS_URL
+  ? process.env.REDIS_URL // If REDIS_URL is provided, use it directly
+  : { // Otherwise, use host and port
+      host: process.env.REDIS_HOST || "127.0.0.1",
+      port: parseInt(process.env.REDIS_PORT || "6379", 10),
+    };
 
-const redisConnectionConfig = getRedisConnectionConfig();
+console.log("Initializing Redis connection with:", connectionOptions);
 
+// Create a single, reusable Redis connection instance
+const redisConnection = new Redis(connectionOptions, {
+    // This option is often needed for cloud Redis providers like Render
+    maxRetriesPerRequest: null,
+});
+
+// Create the queue, passing the connection instance
 const webhookProcessingQueue = new Queue("webhook-processing", {
-  connection: redisConnectionConfig,
+  connection: redisConnection,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -37,5 +39,5 @@ const webhookProcessingQueue = new Queue("webhook-processing", {
   },
 });
 
-// Exporta a fila e a configuração de conexão para ser usada pelo worker
-module.exports = { webhookProcessingQueue, redisConnectionConfig };
+// Export both the queue and the shared connection instance
+module.exports = { webhookProcessingQueue, redisConnection };
