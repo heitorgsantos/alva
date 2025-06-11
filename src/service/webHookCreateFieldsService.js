@@ -4,6 +4,7 @@ const {
   formataData,
   formatEvent,
   queryCompanyCnpj,
+  searchCompanyOmie,
 } = require("../../utis/functions");
 const { queryCompany } = require("../../utis/querys");
 require("dotenv").config();
@@ -62,7 +63,7 @@ const handleClientSupplierIncluded = async ({
       error.message,
       error.status ? `Status: ${error.status}` : ""
     );
-    
+
     throw error;
   }
 };
@@ -72,13 +73,39 @@ const handleProductSaleBilled = async ({
   idCliente,
   idPedido,
   valorPedido,
-  numeroPedido
+  numeroPedido,
 }) => {
   try {
+    let companyId = null;
     const responseCompany = await findCompany(queryCompany(idCliente));
+    if (responseCompany.results.length === 0) {
+      const responseCompanyOmie = await searchCompanyOmie(idCliente);
+      if (responseCompanyOmie !== "Não Encontrado") {
+        const { cnpj_cpf, razao_social, codigo_cliente_omie } =
+          responseCompanyOmie;
+        const propertiesCompany = {
+          properties: {
+            cnpj: cnpj_cpf,
+            name: razao_social,
+            codigo_cliente_omie,
+          },
+        };
 
-    if (responseCompany?.results.length > 0) {
-      const companyId = responseCompany.results[0].id;
+        const responseCreateClient = await baseHubSpot.post(
+          "crm/v3/objects/companies",
+          propertiesCompany
+        );
+
+        if (responseCreateClient.status === 201) {
+          companyId = responseCreateClient.data.id;
+        }
+      }
+    } else {
+      companyId = responseCompany.results[0].id;
+    }
+
+    if (companyId) {
+      companyId = responseCompany.results[0].id;
 
       const propertiesDeals = {
         properties: {
@@ -90,7 +117,7 @@ const handleProductSaleBilled = async ({
           valor_total_pedido: valorPedido,
           amount: valorPedido,
           closedate: formataData(dataFaturado),
-          numero_pedido: numeroPedido
+          numero_pedido: numeroPedido,
         },
         associations: [
           {

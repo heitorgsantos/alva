@@ -1,4 +1,3 @@
-
 const { baseOmie, baseHubSpot } = require("./basesApi");
 require("dotenv").config();
 const APP_KEY = process.env.APP_KEY;
@@ -56,6 +55,29 @@ const responseProductsOmie = async (page, perPage) => {
     return { pagging, totalPagging, responseOmie };
   } catch (error) {
     return error;
+  }
+};
+
+const searchCompanyOmie = async (id) => {
+  const params = {
+    param: [
+      {
+        codigo_cliente_omie: id,
+      },
+    ],
+    app_key: APP_KEY,
+    app_secret: APP_SECRET,
+    call: "ConsultarCliente",
+  };
+
+  try {
+    let responseOmie = await baseOmie.post("api/v1/geral/clientes/", params);
+    if (responseOmie.status === 200) {
+      return responseOmie.data;
+    }
+    return "Não Encontrado";
+  } catch (erro) {
+    return erro.message;
   }
 };
 
@@ -367,4 +389,5 @@ module.exports = {
   formatEvent,
   returnProductsAssociatedsDeals,
   queryCompanyCnpj,
+  searchCompanyOmie,
 };
