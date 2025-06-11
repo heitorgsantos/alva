@@ -29,7 +29,7 @@ if (redisUrl) {
         maxRetriesPerRequest: null,
     });
 }
-
+ console.log(redisConnection)
 
 const webhookProcessingQueue = new Queue("webhook-processing", {
   connection: redisConnection,
