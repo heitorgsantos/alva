@@ -5,16 +5,23 @@ require("dotenv").config();
 
 const redisUrl = process.env.REDIS_URL;
 
-// Log para depuração final
-console.log("VERIFICAÇÃO FINAL: Conectando com a URL:", redisUrl);
+// Log para depuração
+console.log("Conectando com a URL:", redisUrl);
 
-// Esta configuração é a mais robusta para a Render
-const redisConnection = new Redis(redisUrl, {
+// Cria as opções de conexão
+const connectionOptions = {
   maxRetriesPerRequest: null,
-  tls: {
-    rejectUnauthorized: false // Opção importante para compatibilidade
-  }
-});
+};
+
+// Adiciona a configuração TLS SOMENTE se a URL for de produção (começar com rediss://)
+if (redisUrl && redisUrl.startsWith("rediss://")) {
+  console.log("Modo de produção detectado. Adicionando opções de TLS.");
+  connectionOptions.tls = {
+    rejectUnauthorized: false,
+  };
+}
+
+const redisConnection = new Redis(redisUrl, connectionOptions);
 
 const webhookProcessingQueue = new Queue("webhook-processing", {
   connection: redisConnection,

@@ -5,6 +5,8 @@ const webHookCreateFieldsController = async (req, res) => {
   try {
     const jobData = req.body;
 
+    console.log(jobData)
+
     if (!jobData || !jobData.topic || !jobData.event) {
       return res.status(400).json({
         message: "Invalid webhook data: topic and event are required.",

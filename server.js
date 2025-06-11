@@ -7,9 +7,9 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(router); // Assuming your router prefix is '/' or defined within route.js
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+app.use(router); // Assuming your router prefix is '/' or defined within route.js
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}!`);
