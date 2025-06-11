@@ -72,6 +72,7 @@ const handleProductSaleBilled = async ({
   idCliente,
   idPedido,
   valorPedido,
+  numeroPedido
 }) => {
   try {
     const responseCompany = await findCompany(queryCompany(idCliente));
@@ -83,12 +84,13 @@ const handleProductSaleBilled = async ({
         properties: {
           pipeline: PIPELINE,
           dealstage: DEALSTAGE,
-          dealname: `Pedido: ${idPedido}`,
+          dealname: `Pedido: ${numeroPedido}`,
           codigo_cliente: idCliente,
           codigo_pedido: idPedido,
           valor_total_pedido: valorPedido,
           amount: valorPedido,
           closedate: formataData(dataFaturado),
+          numero_pedido: numeroPedido
         },
         associations: [
           {
