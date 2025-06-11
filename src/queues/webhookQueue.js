@@ -1,25 +1,36 @@
 // src/queues/webhookQueue.js
 const { Queue } = require("bullmq");
-const Redis = require("ioredis"); // Import the ioredis library
+const Redis = require("ioredis");
 require("dotenv").config();
 
-// Determine the Redis connection options
-const connectionOptions = process.env.REDIS_URL
-  ? process.env.REDIS_URL // If REDIS_URL is provided, use it directly
-  : { // Otherwise, use host and port
-      host: process.env.REDIS_HOST || "127.0.0.1",
-      port: parseInt(process.env.REDIS_PORT || "6379", 10),
-    };
+const redisUrl = process.env.REDIS_URL;
 
-console.log("Initializing Redis connection with:", connectionOptions);
+// Let's create the connection options object
+let redisConnection;
 
-// Create a single, reusable Redis connection instance
-const redisConnection = new Redis(connectionOptions, {
-    // This option is often needed for cloud Redis providers like Render
-    maxRetriesPerRequest: null,
-});
+if (redisUrl) {
+    console.log("Initializing Redis connection with URL:", redisUrl);
+    // When using a `rediss://` URL from a provider like Render,
+    // ioredis typically handles TLS automatically. However, explicitly
+    // adding the tls object can resolve ambiguity.
+    redisConnection = new Redis(redisUrl, {
+        maxRetriesPerRequest: null,
+        // Add this tls object to be explicit, especially if your URL is just redis://
+        tls: {
+            rejectUnauthorized: false // This can help bypass cert issues in some environments.
+                                    // For high security, you might need to configure this properly.
+        }
+    });
+} else {
+    console.log("Initializing Redis connection with Host/Port");
+    redisConnection = new Redis({
+        host: process.env.REDIS_HOST || "127.0.0.1",
+        port: parseInt(process.env.REDIS_PORT || "6379", 10),
+        maxRetriesPerRequest: null,
+    });
+}
 
-// Create the queue, passing the connection instance
+
 const webhookProcessingQueue = new Queue("webhook-processing", {
   connection: redisConnection,
   defaultJobOptions: {
@@ -39,5 +50,4 @@ const webhookProcessingQueue = new Queue("webhook-processing", {
   },
 });
 
-// Export both the queue and the shared connection instance
 module.exports = { webhookProcessingQueue, redisConnection };
