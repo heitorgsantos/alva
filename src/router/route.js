@@ -5,6 +5,6 @@ const {
 
 const router = Router();
 
-router.post("/create-files", webHookCreateFieldsController);
+router.post("/create-files/sandbox", webHookCreateFieldsController);
 
 module.exports = { router };
