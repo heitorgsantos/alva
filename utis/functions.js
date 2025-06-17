@@ -246,10 +246,13 @@ const queryCompanyCnpj = (cnpj_cpf) => ({
   ],
 });
 
-function formataData(data) {
-  const splitData = data.split("/");
-  const dataFormatada = `${splitData[2]}-${splitData[1]}-${splitData[0]}`;
-  return dataFormatada;
+function formataData(dataString) {
+  const [dia, mes, ano] = dataString.split("/");
+  const dataFormatada = `${ano}-${mes}-${dia}`;
+  const dataGerada = new Date(dataFormatada);
+  dataGerada.setHours(dataGerada.getHours() + 3);
+
+  return dataGerada;
 }
 
 const findCompany = async (queryCompany) => {
@@ -379,6 +382,7 @@ const formatEvent = (event) => {
 
   return propertiesProcutcs;
 };
+console.log(formataData("17/06/2025"));
 
 module.exports = {
   responseProductsOmie,
