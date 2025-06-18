@@ -5,17 +5,17 @@ const webHookCreateFieldsController = async (req, res) => {
   try {
     const jobData = req.body;
 
-    if (!jobData || !jobData.topic || !jobData.event) {
-      return res.status(400).json({
-        message: "Invalid webhook data: topic and event are required.",
-      });
-    }
+    // if (!jobData || !jobData.topic || !jobData.event) {
+    //   return res.status(400).json({
+    //     message: "Invalid webhook data: topic and event are required.",
+    //   });
+    // }
 
-    await webhookProcessingQueue.add(`webhook-${jobData.topic}`, jobData);
+    // await webhookProcessingQueue.add(`webhook-${jobData.topic}`, jobData);
 
-    console.log(
-      `Webhook event for topic "${jobData.topic}" queued for processing.`
-    );
+    // console.log(
+    //   `Webhook event for topic "${jobData.topic}" queued for processing.`
+    // );
     return res
       .status(202)
       .json({ message: "Webhook received and queued for processing." });
