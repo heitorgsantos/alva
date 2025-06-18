@@ -18,9 +18,17 @@ const handleClientSupplierIncluded = async ({
   codigo_cliente_omie,
   inativo,
 }) => {
-  const propertiesCompany = {
+  const propertiesCompanyCNPJ = {
     properties: {
       cnpj: cnpj_cpf,
+      name: razao_social,
+      codigo_cliente_omie,
+    },
+  };
+
+   const propertiesCompanyCPF = {
+    properties: {
+      cpf: cnpj_cpf,
       name: razao_social,
       codigo_cliente_omie,
     },
@@ -50,8 +58,9 @@ const handleClientSupplierIncluded = async ({
     } else {
       const responseCreateClient = await baseHubSpot.post(
         "crm/v3/objects/companies",
-        propertiesCompany
+      cnpj_cpf.length === "18" ? propertiesCompanyCNPJ : propertiesCompanyCPF
       );
+
       return {
         status: responseCreateClient.status,
         message: responseCreateClient.data,
