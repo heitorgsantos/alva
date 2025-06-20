@@ -382,7 +382,17 @@ const formatEvent = (event) => {
 
   return propertiesProcutcs;
 };
-console.log(formataData("17/06/2025"));
+
+function CNPJFormater(cnpj) {
+  const cnpjLimpo = cnpj.replace(/\D/g, '');
+
+  if (cnpjLimpo.length !== 14) {
+    return cnpj;
+  }
+
+  // Aplica a máscara de formatação do CNPJ
+  return cnpjLimpo.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+}
 
 module.exports = {
   responseProductsOmie,
@@ -394,4 +404,5 @@ module.exports = {
   returnProductsAssociatedsDeals,
   queryCompanyCnpj,
   searchCompanyOmie,
+  CNPJFormater
 };

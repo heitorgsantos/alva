@@ -5,6 +5,7 @@ const {
   formatEvent,
   queryCompanyCnpj,
   searchCompanyOmie,
+  CNPJFormater,
 } = require("../../utis/functions");
 const { queryCompany } = require("../../utis/querys");
 require("dotenv").config();
@@ -20,7 +21,7 @@ const handleClientSupplierIncluded = async ({
 }) => {
   const propertiesCompanyCNPJ = {
     properties: {
-      cnpj: cnpj_cpf,
+      cnpj: CNPJFormater(cnpj_cpf),
       name: razao_social,
       codigo_cliente_omie,
     },
