@@ -57,13 +57,9 @@ const handleClientSupplierIncluded = async ({
         };
       }
     } else {
-      console.log(
-        "CNPJ",
-        cnpj_cpf.length === "18" ? propertiesCompanyCNPJ : propertiesCompanyCPF
-      );
       const responseCreateClient = await baseHubSpot.post(
         "crm/v3/objects/companies",
-        cnpj_cpf.length === "18" ? propertiesCompanyCNPJ : propertiesCompanyCPF
+        cnpj_cpf.length === 18 ? propertiesCompanyCNPJ : propertiesCompanyCPF
       );
 
       return {
